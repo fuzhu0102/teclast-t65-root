@@ -1,0 +1,41 @@
+{
+  "schema": "magic64-patch/1",
+  "description": "T65 / UMS9230S — force get_lock_status() to report unlocked, including the global the AVB callback reads.",
+
+  "target": {
+    "image": "lk-sign.bin (stock LK extracted from the stock PAC)",
+    "image_size": 1262792,
+    "image_sha256": "b286d8d308f7f2c6cf6f6d997cefee182f32306994c8ad6e860cc53f307ed785",
+    "load_base": "0x9EFFFE00",
+    "payload_base": "0x9F000000",
+    "stock_mimg_size": "0x133E10"
+  },
+
+  "expected_output": {
+    "size": 1263048,
+    "sha256": "69145c92e72c9703b1fecce0631b9c4c43eeb9ca3f88f7b1bb169ce10b52ccdc"
+  },
+
+  "why": "get_lock_status() does not only return the state: it maintains the global _DAT_9f13d8c8 (0x9F13D8C8). The AVB 'is device unlocked' callback FUN_9f0680b0 reads that global directly and never calls get_lock_status(). Patching only the return value therefore splits the state — callers see 'unlocked' while AVB still sees 'locked', and ro.boot.verifiedbootstate stays green. Writing the global as well makes both paths agree (verified: orange / unlocked).",
+
+  "patches": [
+    {
+      "addr": "0x9F064540",
+      "symbol": "get_lock_status",
+      "original_words": ["0xA9BD7BFD", "0xD2803B80", "0x910003FD", "0xA90153F3"],
+      "original_asm": [
+        "stp x29, x30, [sp, #-0x30]!",
+        "mov x0, #0x1dc",
+        "mov x29, sp",
+        "stp x19, x20, [sp, #0x10]"
+      ],
+      "words": ["0x52800020", "0xB00006C9", "0xB908C920", "0xD65F03C0"],
+      "asm": [
+        "mov  w0, #1",
+        "adrp x9, 0x9F13D000",
+        "str  w0, [x9, #0x8C8]",
+        "ret"
+      ]
+    }
+  ]
+}

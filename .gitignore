@@ -1,0 +1,21 @@
+# firmware images (not redistributable)
+*.bin
+*.img
+*.tag
+*.pac
+*.apk
+*.exe
+*.dll
+*.zip
+stock/
+work/
+downloads/
+DeviceBackup/
+
+# tools / build leftovers
+__pycache__/
+*.pyc
+temp/
+patched.bin
+magic.bin
+*.log
