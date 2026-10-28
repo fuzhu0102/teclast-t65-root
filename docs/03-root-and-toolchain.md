@@ -242,7 +242,7 @@ spd_dump --wait 60 --reconnect exec_addr 0x65015f08 `
 
 - 初次刷入补丁 LK 时，**用户数据会被抹除**（见 docs/02）。
 - 抹掉的数据**不能**靠刷回固件找回 —— 固件里没有你的数据。
-- 需要保留数据时，先做备份再动手；本机是"数据无所谓"的前提。
+- 需要保留数据时，先做备份再动手。
 
 ### 恢复后必须验证
 
@@ -323,16 +323,3 @@ python tools/magic64_patch.py stock\lk-sign.bin 0x9F000000 patches\get_lock_stat
 例 2：全局变量 `0x9F13D8C8` → 9 处引用，其中 `0x9F064550`（`str w`，写）与 `0x9F0680B0`（`ldr w`，读）就是状态分裂的两端。
 
 **边界**：这个扫描只认上述 ADRP 相对寻址形式，间接引用（指针表、寄存器间接）扫不到。**"未找到"不等于"没有引用"**，要下结论请用反汇编器复核。
-
-## 六、附带的实际用途
-
-Root 之后装了 [ACC](https://github.com/VR-25/acc) + [AccA](https://github.com/MatteCarra/AccA) 做充电上限控制（本项目 root 的初衷）。
-
-安装：
-
-```powershell
-adb install AccA.apk
-adb shell "su -c 'magisk --install-module /sdcard/acc_module.zip'"
-```
-
-重启后在 AccA 里设置上限百分比即可。

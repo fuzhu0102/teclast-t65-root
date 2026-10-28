@@ -4,7 +4,7 @@
 
 ## 1. 目标与结果
 
-目标：在台电 T65 上获得 root。本项目的用途是装 ACC/AccA 做充电上限控制。
+目标：在台电 T65 上获得 root。
 
 路线一句话：**不碰 SPL；用 `magic64` 包装原厂 LK，让它在运行时给自己打补丁，使 AVB 汇报"已解锁"；再把 Magisk 修补过的 `init_boot` 经下载模式写进去。**
 
@@ -207,4 +207,3 @@ tools/xref_scan.py                      查找 ADRP 相对引用（ADD/LDR/STR�
 - [YC-nw](https://github.com/YC-nw/bsp_sign_fxxker)：Pre-Verification 签名绕过
 - [nec093](https://github.com/nec093/uis7861-uboot-avb-bypass)：UMS9230 / QOGIRL6 的 U-Boot + AVB 分析
 - [topjohnwu](https://github.com/topjohnwu/Magisk)：Magisk
-- [VR-25](https://github.com/VR-25/acc) / [MatteCarra](https://github.com/MatteCarra/AccA)：ACC / AccA

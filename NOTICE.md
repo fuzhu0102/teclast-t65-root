@@ -23,7 +23,6 @@ and check that licence before redistributing or building on it.
 | Magisk | [topjohnwu/Magisk](https://github.com/topjohnwu/Magisk) | Root solution used here (`v31.1`) | GPL-3.0; the APK is downloaded by the user, not redistributed here |
 | `spd_dump` | [TomKing062/spd_dump](https://github.com/TomKing062/spd_dump) | Download-mode (BootROM/FDL) tool used to read and write partitions | See upstream repository |
 | `aarch64-linux-android-{as,ld,objcopy}` | GNU Binutils (shipped with the Android NDK) | Assembler / linker / objcopy that `magic64` shells out to | **GPL-3.0-or-later**. Checked on the local binaries: version string `binutils-2.27-bf0c2e88` plus the notice *"GNU General Public License version 3 or (at your option) a later version"* |
-| ACC / AccA | [VR-25/acc](https://github.com/VR-25/acc), [MatteCarra/AccA](https://github.com/MatteCarra/AccA) | Charge-limit module/app mentioned as the motivation for rooting | See upstream repositories |
 
 ## Not included at all
 
