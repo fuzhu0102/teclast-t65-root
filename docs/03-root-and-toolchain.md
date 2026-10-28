@@ -32,7 +32,7 @@ cp lib/arm64-v8a/libmagisk.so magisk64
 
 ### PC 端：准备文件
 
-以下命令都在**仓库根目录**（`gh-repo\`）执行，路径都相对于它。先建好目录：
+以下命令都在**仓库根目录**执行，路径都相对于它。先建好目录：
 
 ```powershell
 New-Item -ItemType Directory -Force -Path downloads, work\magisk-apk | Out-Null
@@ -135,7 +135,7 @@ adb shell getprop ro.boot.slot_suffix    # 本机 = _a
 实测 fastboot 写入 8 MiB 镜像时会在写入阶段报 `usb_read failed` 并中断（`Sending OKAY` 之后失败），存在写坏分区的风险。下载模式全程稳定：
 
 ```powershell
-# 在仓库根目录执行；产物在第 7 步已取回 work\
+# 在仓库根目录执行；产物已在上一节取回到 work\
 spd_dump --wait 60 --reconnect exec_addr 0x65015f08 `
   fdl work\fdl1-dl.bin 0x65000800 `
   fdl work\lk-fdl2-sign_patched.bin 0x9efffe00 `
@@ -177,7 +177,7 @@ uid=0(root) gid=0(root) groups=0(root) context=u:r:magisk:s0
 
 ## 四、恢复
 
-> 以下命令都在**仓库根目录（`gh-repo\`）**执行；恢复素材统一放 `work\`。
+> 以下命令都在**仓库根目录**执行；恢复素材统一放 `work\`。
 > 说明：本机这些故障**都**是通过下载模式恢复回来的（5 次以上）。BootROM 位于掩膜 ROM，但此前成功恢复不保证所有故障都能恢复；下载通道能否进入、USB 通信、存储和硬件状态仍需满足恢复条件。
 
 先准备恢复素材（一次拷好，两种情况的命令都用这几个名字）：
@@ -240,7 +240,7 @@ spd_dump --wait 60 --reconnect exec_addr 0x65015f08 `
 
 ### 数据
 
-- 初次刷入补丁 LK 时，**用户数据会被抹除**（见 02 的观察）。
+- 初次刷入补丁 LK 时，**用户数据会被抹除**（见 docs/02）。
 - 抹掉的数据**不能**靠刷回固件找回 —— 固件里没有你的数据。
 - 需要保留数据时，先做备份再动手；本机是"数据无所谓"的前提。
 
@@ -276,7 +276,7 @@ Get-FileHash work\vf-uboot_a.bin, work\vf-uboot_b.bin, work\vf-spl.bin, work\vf-
 
 > ⚠️ 读的字节数就是**写进去的字节数**（`uboot` 只读 1,262,792 B），所以这比对证明的是「**我们写过的这段有效范围**与原厂一致」，**不是**「整个 3 MiB 分区逐字节等于原厂」。分区尾部的剩余区域本次未判定。
 
-我们正是在这一步发现过「设备能开机，但 `uboot` 里还是改过的 LK」——功能上无害，但确实不是原厂字节。
+这一步能发现「设备能开机，但 `uboot` 里仍是改过的 LK」的情况：功能上无害，但不是原厂字节。
 
 ## 五、工具链
 

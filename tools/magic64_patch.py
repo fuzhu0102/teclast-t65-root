@@ -55,7 +55,7 @@ Example - T65 / UMS9230S get_lock_status:
 
     python tools/magic64_patch.py stock/lk-sign.bin 0x9F000000 \
         patches/get_lock_status.json -o lk-global1.bin \
-        --magic64 downloads/chipram_exploit/magic64.exe
+        --magic64 <magic64 dir>/magic64.exe
 
     stock  sha256 b286d8d3...  (1,262,792 B)
     output sha256 69145c92...  (1,263,048 B)

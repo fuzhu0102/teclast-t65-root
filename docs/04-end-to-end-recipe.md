@@ -1,11 +1,11 @@
 # 04 — 从原厂到 Root：完整操作顺序
 
-> **所有命令都在仓库根目录（`gh-repo\`）执行**，路径一律相对于它：素材放 `stock\`，产物放 `work\`。
-> 原理见 `02`，细节与坑见 `03`。**先读完全文再动手。**
+> **所有命令都在仓库根目录执行**，路径一律相对于它：素材放 `stock\`，产物放 `work\`。
+> 原理见 docs/02，细节与坑见 docs/03。**先读完全文再动手。**
 
-## 0. 先想清楚的三件事
+## 0. 操作前须知
 
-1. **数据会被抹掉。** 第一次刷入补丁 LK 后，boot 状态从 `green` 变 `orange`，Android 会要求恢复出厂（见 02 的观察）。抹掉的数据**不能**靠刷固件找回。
+1. **数据会被抹掉。** 第一次刷入补丁 LK 后，boot 状态从 `green` 变 `orange`，Android 会要求恢复出厂（见 docs/02）。抹掉的数据**不能**靠刷固件找回。
 2. **这是"改 LK 强制解锁"，不是厂商认可的永久解锁。** 原厂 LK、固件回刷、OTA 替换 `uboot`/`trustos`/`vbmeta` 都可能让方法失效。
 3. **本机验证的是唯一一台设备。** 另一台 A7D5 若固件版本不同，`0x9F064540` 这类地址、甚至 `get_lock_status` 是否存在都要重新确认 —— `tools/magic64_patch.py` 会在镜像哈希或原始指令不一致时拒绝生成，别用 `--force` 绕过。
 
@@ -14,7 +14,7 @@
 ### 1.1 建目录
 
 ```powershell
-# 当前目录应是仓库根 gh-repo\
+# 当前目录应是仓库根目录
 New-Item -ItemType Directory -Force -Path stock, work, downloads | Out-Null
 ```
 
@@ -45,7 +45,7 @@ Get-FileHash stock\lk-sign.bin, stock\u-boot-spl-16k-emmc-sign.bin, stock\init_b
 | `u-boot-spl-16k-emmc-sign.bin` | `splloader` / `splloader_bak` 的前 66,552 B | 66,552 | `f816ddee9ae751965a8d0a64f7e348340dbf7774e1a48f56e69e8c84d56b4ce2` |
 | `init_boot.img` | `init_boot_a` | 8,388,608 | `af497fdc8397fe8bdd92fd4d798e8f92e167207df128dec083e39c87adb7ac2f` |
 
-`trustos` / `sml` / `teecfg` 本路线**不需要**（见 01 的 ④⑤）。
+`trustos` / `sml` / `teecfg` 本路线**不需要**（见 docs/01 方案评估第 4、5 条）。
 `uboot_a/b` 分区是 3 MiB，而 LK 镜像只有 1,262,792 B；下面凡是要"比对原厂"，比的都是**这 1,262,792 B 有效范围**，不是整个分区。
 
 ### 1.3 工具（版本固定）
@@ -78,7 +78,7 @@ adb shell getprop ro.build.version.incremental
 
 - 启动镜像写 `init_boot_<slot>`（本机 `init_boot_a`）。
 - LK 补丁**两个槽位都写**（`uboot_a` 与 `uboot_b`）—— 下一次启动可能切槽，只写一个会表现为"改完有时生效有时不生效"。
-- `splloader` 与 `splloader_bak` **全程保持原厂**，本方法不写它们（见 01 的 ②）。
+- `splloader` 与 `splloader_bak` **全程保持原厂**，本方法不写它们（见 docs/01 方案评估第 2 条）。
 
 ## 3. 生成候选 LK 并核对
 
@@ -86,7 +86,7 @@ adb shell getprop ro.build.version.incremental
 python tools\magic64_patch.py stock\lk-sign.bin 0x9F000000 patches\get_lock_status.json --check
 
 # <magic64目录> 换成你解压 magic64 的那一层（同目录里要有 magic64.exe
-# 和 aarch64-linux-android-as/ld/objcopy.exe）。本机放在 ..\downloads\chipram_exploit\
+# 和 aarch64-linux-android-as/ld/objcopy.exe）。
 python tools\magic64_patch.py stock\lk-sign.bin 0x9F000000 patches\get_lock_status.json `
     -o work\lk-global1.bin --magic64 "<magic64目录>\magic64.exe"
 ```
@@ -184,19 +184,19 @@ adb shell getprop sys.boot_completed           # 期望 1
 ```
 
 - 若第一次开机出现恢复出厂提示：抹除并按提示重启，然后再查这三项。
-- 若仍 `green`/`locked`：别把"能开机"当成功，回第 3 步复核补丁地址与 `patch_data` 是否真的进去了（`02` 的"状态分裂"就是这种情况）。
-- 若设备起不来：走 `03` 的**情况 A**。
+- 若仍 `green`/`locked`：别把"能开机"当成功，回第 3 步复核补丁地址与 `patch_data` 是否真的进去了（docs/02 的"状态分裂"就是这种情况）。
+- 若设备起不来：走 docs/03 的**情况 A**。
 
 > 这三项只证明**锁状态已翻转**。"AVB 不再拦修改过的启动镜像"要靠第 7、8 步（修补过的 `init_boot` 真启动并拿到 `su`）来证明。
 
 ## 7. 修补并刷入 init_boot
 
-按 `03` 第一节在**平板上**跑 `boot_patch.sh`（关键是 `cp libmagisk.so magisk`），再把产物取回 `work\`：
+按 docs/03 第一节在**平板上**跑 `boot_patch.sh`（关键是 `cp libmagisk.so magisk`），再把产物取回 `work\`：
 
 ```powershell
 adb pull /data/local/tmp/magisk/new-boot.img work\magisk_patched_init_boot.img
 Get-FileHash work\magisk_patched_init_boot.img -Algorithm SHA256
-# 记下这个哈希，第 7 步写入后要拿它比对（本机是 167a4ccd…，你的版本可能不同，以本次为准）
+# 记下这个哈希，下面写入后要拿它比对（本机是 167a4ccd…，你的版本可能不同，以本次为准）
 ```
 
 再确认一次槽位，然后写入：
@@ -225,7 +225,7 @@ Get-FileHash work\vf-init_boot_a.bin, work\magisk_patched_init_boot.img -Algorit
 ## 8. 激活并验收 Root
 
 1. 重启，装 Magisk App，按提示完成"额外安装"。
-2. 在 App 里给 shell 授权（见 `03`）。
+2. 在 App 里给 shell 授权（见 docs/03）。
 3. 判据：
 
 ```powershell
@@ -235,14 +235,15 @@ adb shell su -c id           # uid=0(root) ... context=u:r:magisk:s0
 
 ## 9. 想回到原厂
 
-按 `03` 的**情况 B**：**先**恢复 `init_boot_a/b`，**再**恢复 `uboot_a/b`，最后按需恢复 `splloader`。
-顺序反了会得到"原厂 LK + 改过的启动镜像"，多半起不来。恢复后按 `03` 的"恢复后必须验证"逐分区回读比对。
+按 docs/03 的**情况 B**：**先**恢复 `init_boot_a/b`，**再**恢复 `uboot_a/b`，最后按需恢复 `splloader`。
+顺序反了会得到"原厂 LK + 改过的启动镜像"，多半起不来。恢复后按 docs/03 的"恢复后必须验证"逐分区回读比对。
 
 ## 一次性核对表
 
 | # | 步骤 | 通过判据 |
 |---|---|---|
 | 1 | 素材 | 三个原厂镜像长度/哈希与 1.2 表一致 |
+| 2 | 设备状态 | `green`、板级 `ums9230_6h10`，记下槽位 |
 | 3 | 生成 LK | 退出码 0、payload intact = True、sha256 = `69145c92…` |
 | 4 | 备份 | 回读哈希 = 原厂值（`uboot` 比前 1,262,792 B） |
 | 5 | 写入 LK | 两个槽位回读 sha256 = `69145c92…` |
